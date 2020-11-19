@@ -108,14 +108,9 @@ const grammarObject = {
     resource: $ => seq(
       'resource',
       alias($.string_literal, $.resource_type),
-      choice(
-        alias($.string_literal, $.resource_name),
-        $.query,
-      ),
+      alias($.string_literal, $.resource_name),
       $.block,
     ),
-
-    query: $ => token(seq("$(", /[^)]+/, ")")),
 
     data: $ => seq(
       'data',
@@ -157,9 +152,7 @@ const grammarObject = {
 
     map: $ => seq("{", maybeCommaSep($.keyValue), "}"),
 
-    value_or_query: $ => choice($._expression, $.query),
-
-    keyValue: $ => seq($._stringLike, "=", $.value_or_query),
+    keyValue: $ => seq($._stringLike, "=", $._expression),
 
     _stringLike: $ => choice($.identifier, $.string_literal),
 
@@ -222,10 +215,7 @@ const grammarObject = {
 
     _initializer: $ => seq(
       '=',
-      choice(
-        $.query,
-        $._expression,
-      ),
+      $._expression,
     ),
 
     named_map: $ => seq(
