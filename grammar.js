@@ -152,7 +152,7 @@ const grammarObject = {
 
     map: $ => seq("{", maybeCommaSep($.keyValue), "}"),
 
-    keyValue: $ => seq($._stringLike, "=", $._expression),
+    keyValue: $ => seq($._stringLike, choice("=", ":"), $._expression),
 
     _stringLike: $ => choice($.identifier, $.string_literal),
 
@@ -210,6 +210,8 @@ const grammarObject = {
       "replace",
       "toset",
       "concat",
+      "jsonencode",
+      "formatlist",
     ),
     "(", repeat(seq(alias($._expression, $.fn_param), optional(','))), ")"),
 
@@ -224,15 +226,13 @@ const grammarObject = {
       alias($.block, $.map),
     ),
 
-    list: $ => seq(
-      '[',
-      optional($.for_comprehension),
-      commaSep($._expression),
-      optional(','),
-      ']',
-    ),
+    list: $ => choice($._list_literal, $.for_comprehension),
 
-    for_comprehension: $ => seq("for", $.identifier, "in", $.reference, ":"),
+    _list_literal: $ => seq('[', commaSep($._expression), optional(','), ']'),
+
+    for_comprehension: $ => seq('[', "for", $.identifier, "in", $.reference, ":", $._expression, optional($.if), ']'),
+
+    if: $ => seq('if', $._expression),
 
     identifier: ($) => {
       const alpha = /[a-zA-Z_]+/;
